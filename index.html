@@ -131,13 +131,62 @@
       <h2>Seu perfil está pronto!</h2>
       <p>Você demonstra preferência por experiências dinâmicas, novidades e opções simples de explorar no seu próprio ritmo.</p>
 
-      <!-- Botão sem URL, conforme solicitado -->
       <button class="cta" type="button" id="cta">CADASTRE-SE AGORA</button>
-      <p class="cta-note">Botão sem link configurado.</p>
+      <p class="cta-note">+18 · Apostas envolvem risco. Jogue com responsabilidade.</p>
     </section>
   </main>
 
 <script>
+/* ==========================================================
+   CONFIGURAÇÃO
+   ========================================================== */
+const DESTINO = "https://lp-google.onrender.com/";
+const PASSA_UTM = true;
+
+const SUPABASE = {
+  ativo: true,
+  url:   "https://wkweqhszjujvevnbhhzg.supabase.co",
+  anon:  "sb_publishable_0QsDv6tagm5DUVbuf8IXBQ_HSGhI_Mg",
+  tabela:"quiz_eventos"
+};
+
+/* ==========================================================
+   COLETA — grava no Supabase sem travar a navegação
+   ========================================================== */
+const SESSAO = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random());
+
+function registrar(evento, dados){
+  if(!SUPABASE.ativo) return;
+  try{
+    fetch(SUPABASE.url + "/rest/v1/" + SUPABASE.tabela, {
+      method:"POST",
+      keepalive:true,
+      headers:{
+        "apikey": SUPABASE.anon,
+        "Authorization": "Bearer " + SUPABASE.anon,
+        "Content-Type": "application/json",
+        "Prefer": "return=minimal"
+      },
+      body: JSON.stringify({
+        sessao: SESSAO,
+        evento: evento,
+        etapa: (dados && dados.etapa) || null,
+        pergunta: (dados && dados.pergunta) || null,
+        resposta: (dados && dados.resposta) || null,
+        utms: location.search.slice(1) || null
+      })
+    }).catch(()=>{});
+  }catch(e){}
+}
+
+function track(ev, data){
+  try{ if(window.fbq) fbq("trackCustom", ev, data || {}); }catch(e){}
+  try{ window.dataLayer = window.dataLayer || []; dataLayer.push({event:ev, ...(data||{})}); }catch(e){}
+}
+
+/* ==========================================================
+   QUIZ
+   ========================================================== */
 const questions = [
   {
     q:"O que você mais valoriza no seu tempo livre?",
@@ -199,20 +248,42 @@ back.addEventListener("click",()=>{
 
 next.addEventListener("click",()=>{
   if(answers[step] === null) return;
+
+  const atual = questions[step];
+  registrar("resposta", {
+    etapa: step + 1,
+    pergunta: atual.q,
+    resposta: atual.a[answers[step]]
+  });
+  track("QuizStep", { step: step + 1 });
+
   if(step < questions.length - 1){
     step++;
     render();
   } else {
     quiz.style.display = "none";
     result.style.display = "block";
+    window.scrollTo(0,0);
+    registrar("concluiu", {});
+    track("QuizComplete", {});
   }
 });
 
-/* Sem redirecionamento */
+function montarDestino(){
+  let url = DESTINO;
+  if(PASSA_UTM && location.search.length > 1){
+    url += (url.includes("?") ? "&" : "?") + location.search.slice(1);
+  }
+  return url;
+}
+
 document.getElementById("cta").addEventListener("click",()=>{
- window.open("https://lp-google.onrender.com/", "_blank");
+  registrar("clique_cta", {});
+  track("QuizCTAClick", {});
+  window.open(montarDestino(), "_blank");
 });
 
+registrar("iniciou", {});
 render();
 </script>
 </body>
