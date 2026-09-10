@@ -1,138 +1,52 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Quiz rápido para descobrir seu perfil de entretenimento digital.">
-  <title>Descubra seu perfil</title>
-  <style>
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:24px;
-      font-family:Inter,Arial,sans-serif;
-      background:#f5f7fb;
-      color:#172033;
-    }
-    .card{
-      width:100%;
-      max-width:620px;
-      background:#fff;
-      border:1px solid #e6eaf0;
-      border-radius:22px;
-      padding:34px;
-      box-shadow:0 12px 40px rgba(16,24,40,.08);
-    }
-    .eyebrow{
-      font-size:13px;
-      font-weight:700;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      color:#667085;
-      margin-bottom:10px;
-    }
-    h1{font-size:32px;line-height:1.08;margin:0 0 10px}
-    .sub{color:#667085;line-height:1.55;margin:0 0 28px}
-    .top{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:14px}
-    .count{font-size:13px;color:#667085}
-    .bar{height:7px;background:#eef1f5;border-radius:99px;overflow:hidden;margin-bottom:28px}
-    .progress{height:100%;width:25%;background:#2563eb;transition:.25s}
-    .question{font-size:21px;font-weight:700;line-height:1.35;margin-bottom:18px}
-    .options{display:grid;gap:11px}
-    .option{
-      width:100%;
-      text-align:left;
-      background:#fff;
-      border:1px solid #dfe4ea;
-      color:#172033;
-      border-radius:14px;
-      padding:15px 16px;
-      min-height:54px;
-      font-size:16px;
-      cursor:pointer;
-      transition:.18s;
-    }
-    .option:hover{border-color:#94a3b8;background:#fafbfc}
-    .option.selected{border-color:#2563eb;background:#eff6ff}
-    .actions{display:flex;gap:12px;margin-top:24px}
-    button{font-family:inherit}
-    .btn{
-      min-height:50px;
-      border-radius:13px;
-      border:0;
-      padding:0 20px;
-      font-size:15px;
-      font-weight:800;
-      cursor:pointer;
-    }
-    .secondary{background:#eef2f6;color:#344054}
-    .primary{background:#2563eb;color:white;flex:1}
-    .btn:disabled{opacity:.45;cursor:not-allowed}
-    .result{text-align:center;display:none}
-    .check{
-      width:64px;height:64px;border-radius:50%;
-      margin:0 auto 18px;
-      display:grid;place-items:center;
-      background:#ecfdf3;color:#067647;
-      font-size:28px;font-weight:900;
-    }
-    .result h2{font-size:29px;margin:0 0 12px}
-    .result p{color:#667085;line-height:1.55;margin:0 auto 24px;max-width:460px}
-    .cta{
-      width:100%;
-      min-height:56px;
-      border:0;
-      border-radius:14px;
-      background:#2563eb;
-      color:#fff;
-      font-size:17px;
-      font-weight:900;
-      cursor:pointer;
-    }
-    @media(max-width:520px){
-      body{padding:14px}
-      .card{padding:24px 18px;border-radius:18px}
-      h1{font-size:27px}
-      .question{font-size:19px}
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#ffffff">
+<title>Descubra seu perfil</title>
+<style>
+  *{box-sizing:border-box}
+  body{
+    margin:0;min-height:100vh;min-height:100dvh;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+    font-family:Inter,Arial,Helvetica,sans-serif;
+    background:#ffffff;
+  }
+  .card{
+    width:100%;max-width:380px;
+    background:#ffffff;
+    border:1px solid #E6EAF0;
+    border-radius:18px;
+    padding:30px 26px 26px;
+    box-shadow:0 10px 34px rgba(16,24,40,.07);
+    text-align:center;
+  }
+  h1{
+    font-size:23px;line-height:1.25;font-weight:800;color:#172033;
+    margin:0 0 22px;
+  }
+  .opt{
+    display:block;width:100%;
+    background:#F5D14E;color:#172033;
+    border:0;border-radius:11px;
+    font-family:inherit;font-size:16px;font-weight:600;
+    padding:16px 14px;margin-bottom:14px;cursor:pointer;
+    transition:background .15s ease,transform .1s ease;
+  }
+  .opt:last-child{margin-bottom:0}
+  .opt:hover{background:#F8DC72}
+  .opt:active{transform:scale(.985)}
+  .opt:focus-visible{outline:3px solid #172033;outline-offset:2px}
+  .msg{font-size:15px;line-height:1.5;color:#667085;margin:0}
+</style>
 </head>
 <body>
-  <main class="card">
-    <section id="quiz">
-      <div class="eyebrow">Quiz rápido</div>
-      <h1>Descubra seu perfil</h1>
-      <p class="sub">Responda algumas perguntas rápidas e veja qual estilo de experiência mais combina com você.</p>
 
-      <div class="top">
-        <strong>Seu perfil</strong>
-        <span class="count" id="count">1 de 4</span>
-      </div>
-
-      <div class="bar"><div class="progress" id="progress"></div></div>
-
-      <div class="question" id="question"></div>
-      <div class="options" id="options"></div>
-
-      <div class="actions">
-        <button class="btn secondary" id="back" type="button">Voltar</button>
-        <button class="btn primary" id="next" type="button" disabled>Continuar</button>
-      </div>
-    </section>
-
-    <section class="result" id="result">
-      <div class="check">✓</div>
-      <div class="eyebrow">Resultado concluído</div>
-      <h2>Seu perfil está pronto!</h2>
-      <p>Você demonstra preferência por experiências dinâmicas, novidades e opções simples de explorar no seu próprio ritmo.</p>
-
-      <button class="cta" type="button" id="cta">CADASTRE-SE AGORA</button>
-    </section>
-  </main>
+<main class="card">
+  <h1 id="pergunta"></h1>
+  <div id="opcoes"></div>
+</main>
 
 <script>
 /* ==========================================================
@@ -148,8 +62,33 @@ const SUPABASE = {
   tabela:"quiz_eventos"
 };
 
+/* bloqueia: encerra o quiz  |  avanca: manda para o destino */
+const PERGUNTAS = [
+  {
+    q:"Você tem mais de 18 anos?",
+    a:[ {t:"Sim"}, {t:"Não", bloqueia:true} ]
+  },
+  {
+    q:"Você gosta de se divertir online e receber vários benefícios?",
+    a:[ {t:"Sim"}, {t:"Mais ou menos"} ]
+  },
+  {
+    q:"Se você tivesse um ganho alto hoje, o que faria?",
+    a:[
+      {t:"Colocaria as contas em dia"},
+      {t:"Guardaria uma parte"},
+      {t:"Realizaria um sonho antigo"},
+      {t:"Aproveitaria o momento"}
+    ]
+  },
+  {
+    q:"Você gosta de novidades e promoções quentes?",
+    a:[ {t:"Sim", avanca:true}, {t:"Quero entender melhor", avanca:true} ]
+  }
+];
+
 /* ==========================================================
-   COLETA — grava no Supabase sem travar a navegação
+   COLETA
    ========================================================== */
 const SESSAO = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random());
 
@@ -157,8 +96,7 @@ function registrar(evento, dados){
   if(!SUPABASE.ativo) return;
   try{
     fetch(SUPABASE.url + "/rest/v1/" + SUPABASE.tabela, {
-      method:"POST",
-      keepalive:true,
+      method:"POST", keepalive:true,
       headers:{
         "apikey": SUPABASE.anon,
         "Authorization": "Bearer " + SUPABASE.anon,
@@ -185,89 +123,11 @@ function track(ev, data){
 /* ==========================================================
    QUIZ
    ========================================================== */
-const questions = [
-  {
-    q:"O que você mais valoriza no seu tempo livre?",
-    a:["Desafios e estratégia","Criatividade","Experiências dinâmicas","Relaxar e desconectar"]
-  },
-  {
-    q:"Qual tipo de experiência chama mais sua atenção?",
-    a:["Resolver desafios","Explorar experiências digitais","Assistir conteúdos","Descobrir coisas novas"]
-  },
-  {
-    q:"Como você costuma escolher algo novo?",
-    a:["Pelas avaliações","Pesquiso antes","Por indicação","Gosto de experimentar"]
-  },
-  {
-    q:"Qual frase combina mais com você?",
-    a:["Gosto de aprender fazendo","Prefiro experiências simples","Estou sempre buscando novidades","Valorizo praticidade"]
-  }
-];
+const elP = document.getElementById("pergunta");
+const elO = document.getElementById("opcoes");
+let i = 0;
 
-let step = 0;
-const answers = new Array(questions.length).fill(null);
-
-const question = document.getElementById("question");
-const options = document.getElementById("options");
-const count = document.getElementById("count");
-const progress = document.getElementById("progress");
-const back = document.getElementById("back");
-const next = document.getElementById("next");
-const quiz = document.getElementById("quiz");
-const result = document.getElementById("result");
-
-function render(){
-  const current = questions[step];
-  question.textContent = current.q;
-  count.textContent = `${step+1} de ${questions.length}`;
-  progress.style.width = `${((step+1)/questions.length)*100}%`;
-  options.innerHTML = "";
-
-  current.a.forEach((text,index)=>{
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "option" + (answers[step] === index ? " selected" : "");
-    btn.textContent = text;
-    btn.addEventListener("click",()=>{
-      answers[step] = index;
-      render();
-    });
-    options.appendChild(btn);
-  });
-
-  back.disabled = step === 0;
-  next.disabled = answers[step] === null;
-  next.textContent = step === questions.length - 1 ? "Ver resultado" : "Continuar";
-}
-
-back.addEventListener("click",()=>{
-  if(step > 0){ step--; render(); }
-});
-
-next.addEventListener("click",()=>{
-  if(answers[step] === null) return;
-
-  const atual = questions[step];
-  registrar("resposta", {
-    etapa: step + 1,
-    pergunta: atual.q,
-    resposta: atual.a[answers[step]]
-  });
-  track("QuizStep", { step: step + 1 });
-
-  if(step < questions.length - 1){
-    step++;
-    render();
-  } else {
-    quiz.style.display = "none";
-    result.style.display = "block";
-    window.scrollTo(0,0);
-    registrar("concluiu", {});
-    track("QuizComplete", {});
-  }
-});
-
-function montarDestino(){
+function destino(){
   let url = DESTINO;
   if(PASSA_UTM && location.search.length > 1){
     url += (url.includes("?") ? "&" : "?") + location.search.slice(1);
@@ -275,11 +135,47 @@ function montarDestino(){
   return url;
 }
 
-document.getElementById("cta").addEventListener("click",()=>{
-  registrar("clique_cta", {});
-  track("QuizCTAClick", {});
-  window.open(montarDestino(), "_blank");
-});
+function render(){
+  const p = PERGUNTAS[i];
+  elP.textContent = p.q;
+  elO.innerHTML = "";
+
+  p.a.forEach(opt=>{
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "opt";
+    b.textContent = opt.t;
+    b.addEventListener("click", ()=> escolher(opt));
+    elO.appendChild(b);
+  });
+}
+
+function escolher(opt){
+  const p = PERGUNTAS[i];
+
+  registrar("resposta", { etapa: i + 1, pergunta: p.q, resposta: opt.t });
+  track("QuizStep", { step: i + 1 });
+
+  if(opt.bloqueia){
+    registrar("bloqueado_menor", { etapa: i + 1 });
+    track("QuizBlockedUnder18", {});
+    elP.textContent = "Conteúdo apenas para maiores de 18 anos";
+    elO.innerHTML = '<p class="msg">Não é possível continuar.</p>';
+    return;
+  }
+
+  if(opt.avanca){
+    registrar("concluiu", {});
+    registrar("clique_cta", {});
+    track("QuizComplete", {});
+    track("QuizCTAClick", {});
+    window.location.href = destino();
+    return;
+  }
+
+  i++;
+  render();
+}
 
 registrar("iniciou", {});
 render();
