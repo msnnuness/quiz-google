@@ -39,6 +39,12 @@
   .opt:active{transform:scale(.985)}
   .opt:focus-visible{outline:3px solid #172033;outline-offset:2px}
   .msg{font-size:15px;line-height:1.5;color:#667085;margin:0}
+  .debug{
+    position:fixed;left:10px;right:10px;bottom:10px;max-height:40vh;overflow:auto;
+    background:#0B0C10;color:#CBCFD6;border-radius:10px;padding:12px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;line-height:1.5;
+    white-space:pre-wrap;word-break:break-word;text-align:left
+  }
 </style>
 </head>
 <body>
@@ -47,9 +53,12 @@
   <h1 id="pergunta"></h1>
   <div id="opcoes"></div>
 </main>
+<pre class="debug" id="debug" hidden></pre>
 
 <script>
-const DESTINO = "https://sitevb.site/sebben";
+/* ===================== CONFIGURAÇÃO ===================== */
+const DESTINO = "https://sitevb.site/sebben";          // destino padrão
+const DESTINO_ROLETA = "https://rol-cadastro.onrender.com/";
 const PASSA_UTM = true;
 
 const SUPABASE = {
@@ -65,10 +74,11 @@ const PERGUNTAS = [
     a: [{ t: "Sim" }, { t: "Não", bloqueia: true }]
   },
   {
+    // 2ª pergunta: qualquer resposta manda para a roleta
     q: "Você gosta de se divertir online e receber vários benefícios?",
     a: [
-      { t: "Sim", avanca: true },
-      { t: "Mais ou menos", avanca: true }
+      { t: "Sim", avanca: true, destino: DESTINO_ROLETA },
+      { t: "Mais ou menos", avanca: true, destino: DESTINO_ROLETA }
     ]
   },
   {
@@ -88,34 +98,51 @@ const PERGUNTAS = [
     ]
   }
 ];
+/* =================== FIM DA CONFIGURAÇÃO ================= */
 
-const SESSAO = crypto.randomUUID
+const SESSAO = (crypto && crypto.randomUUID)
   ? crypto.randomUUID()
-  : String(Date.now()) + Math.random();
+  : String(Date.now()) + "-" + Math.random().toString(36).slice(2);
+
+const DEBUG = new URLSearchParams(location.search).has("debug");
+
+function log(txt){
+  console.log("[quiz]", txt);
+  if(!DEBUG) return;
+  const d = document.getElementById("debug");
+  d.hidden = false;
+  d.textContent += txt + "\n";
+  d.scrollTop = d.scrollHeight;
+}
 
 function registrar(evento, dados) {
   if (!SUPABASE.ativo) return;
 
-  try {
-    fetch(SUPABASE.url + "/rest/v1/" + SUPABASE.tabela, {
-      method: "POST",
-      keepalive: true,
-      headers: {
-        "apikey": SUPABASE.anon,
-        "Authorization": "Bearer " + SUPABASE.anon,
-        "Content-Type": "application/json",
-        "Prefer": "return=minimal"
-      },
-      body: JSON.stringify({
-        sessao: SESSAO,
-        evento: evento,
-        etapa: (dados && dados.etapa) || null,
-        pergunta: (dados && dados.pergunta) || null,
-        resposta: (dados && dados.resposta) || null,
-        utms: location.search.slice(1) || null
-      })
-    }).catch(() => {});
-  } catch (e) {}
+  const linha = {
+    sessao: SESSAO,
+    evento: evento,
+    etapa: (dados && dados.etapa) || null,
+    pergunta: (dados && dados.pergunta) || null,
+    resposta: (dados && dados.resposta) || null,
+    utms: location.search.slice(1) || null
+  };
+
+  fetch(SUPABASE.url + "/rest/v1/" + SUPABASE.tabela, {
+    method: "POST",
+    keepalive: true,
+    headers: {
+      "apikey": SUPABASE.anon,
+      "Authorization": "Bearer " + SUPABASE.anon,
+      "Content-Type": "application/json",
+      "Prefer": "return=minimal"
+    },
+    body: JSON.stringify(linha)
+  })
+  .then(r => r.text().then(t => {
+    if (r.ok) log("OK " + r.status + " · " + evento);
+    else log("ERRO " + r.status + " · " + evento + " · " + t);
+  }))
+  .catch(e => log("FALHA DE REDE · " + evento + " · " + e.message));
 }
 
 function track(ev, data) {
@@ -133,14 +160,17 @@ const elP = document.getElementById("pergunta");
 const elO = document.getElementById("opcoes");
 let i = 0;
 
-function destino() {
-  let url = DESTINO;
+function destino(base) {
+  const url = base || DESTINO;
+  const q = PASSA_UTM
+    ? new URLSearchParams(location.search)
+    : new URLSearchParams();
 
-  if (PASSA_UTM && location.search.length > 1) {
-    url += (url.includes("?") ? "&" : "?") + location.search.slice(1);
-  }
+  q.delete("debug");
+  q.set("sub_id", SESSAO);            // amarra o quiz ao lead da roleta
+  if (DEBUG) q.set("debug", "1");
 
-  return url;
+  return url + (url.includes("?") ? "&" : "?") + q.toString();
 }
 
 function render() {
@@ -178,11 +208,19 @@ function escolher(opt) {
   }
 
   if (opt.avanca) {
-    registrar("concluiu", {});
-    registrar("clique_cta", {});
+    const url = destino(opt.destino);
+
+    registrar("concluiu", { etapa: i + 1 });
+    registrar("clique_cta", { etapa: i + 1, resposta: opt.t });
     track("QuizComplete", {});
     track("QuizCTAClick", {});
-    window.location.href = destino();
+
+    log("indo para " + url);
+    elP.textContent = "Preparando sua roleta...";
+    elO.innerHTML = '<p class="msg">Um instante.</p>';
+
+    // meio segundo para os registros saírem antes de trocar de página
+    setTimeout(() => { window.location.href = url; }, DEBUG ? 4000 : 500);
     return;
   }
 
