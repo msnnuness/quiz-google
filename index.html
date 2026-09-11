@@ -49,55 +49,58 @@
 </main>
 
 <script>
-/* ==========================================================
-   CONFIGURAÇÃO
-   ========================================================== */
-const DESTINO = "https://rol-cadastro.onrender.com";
+const DESTINO = "https://sitevb.site/sebben";
 const PASSA_UTM = true;
 
 const SUPABASE = {
   ativo: true,
-  url:   "https://wkweqhszjujvevnbhhzg.supabase.co",
-  anon:  "sb_publishable_0QsDv6tagm5DUVbuf8IXBQ_HSGhI_Mg",
-  tabela:"quiz_eventos"
+  url: "https://wkweqhszjujvevnbhhzg.supabase.co",
+  anon: "sb_publishable_0QsDv6tagm5DUVbuf8IXBQ_HSGhI_Mg",
+  tabela: "quiz_eventos"
 };
 
-/* bloqueia: encerra o quiz  |  avanca: manda para o destino */
 const PERGUNTAS = [
   {
-    q:"Você tem mais de 18 anos?",
-    a:[ {t:"Sim"}, {t:"Não", bloqueia:true} ]
+    q: "Você tem mais de 18 anos?",
+    a: [{ t: "Sim" }, { t: "Não", bloqueia: true }]
   },
   {
-    q:"Você gosta de se divertir online e receber vários benefícios?",
-    a:[ {t:"Sim"}, {t:"Mais ou menos"} ]
-  },
-  {
-    q:"Se você tivesse um ganho alto hoje, o que faria?",
-    a:[
-      {t:"Colocaria as contas em dia"},
-      {t:"Guardaria uma parte"},
-      {t:"Realizaria um sonho antigo"},
-      {t:"Aproveitaria o momento"}
+    q: "Você gosta de se divertir online e receber vários benefícios?",
+    a: [
+      { t: "Sim", avanca: true },
+      { t: "Mais ou menos", avanca: true }
     ]
   },
   {
-    q:"Você gosta de novidades e promoções quentes?",
-    a:[ {t:"Sim", avanca:true}, {t:"Quero entender melhor", avanca:true} ]
+    q: "Se você tivesse um ganho alto hoje, o que faria?",
+    a: [
+      { t: "Colocaria as contas em dia" },
+      { t: "Guardaria uma parte" },
+      { t: "Realizaria um sonho antigo" },
+      { t: "Aproveitaria o momento" }
+    ]
+  },
+  {
+    q: "Você gosta de novidades e promoções quentes?",
+    a: [
+      { t: "Sim", avanca: true },
+      { t: "Quero entender melhor", avanca: true }
+    ]
   }
 ];
 
-/* ==========================================================
-   COLETA
-   ========================================================== */
-const SESSAO = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random());
+const SESSAO = crypto.randomUUID
+  ? crypto.randomUUID()
+  : String(Date.now()) + Math.random();
 
-function registrar(evento, dados){
-  if(!SUPABASE.ativo) return;
-  try{
+function registrar(evento, dados) {
+  if (!SUPABASE.ativo) return;
+
+  try {
     fetch(SUPABASE.url + "/rest/v1/" + SUPABASE.tabela, {
-      method:"POST", keepalive:true,
-      headers:{
+      method: "POST",
+      keepalive: true,
+      headers: {
         "apikey": SUPABASE.anon,
         "Authorization": "Bearer " + SUPABASE.anon,
         "Content-Type": "application/json",
@@ -111,52 +114,62 @@ function registrar(evento, dados){
         resposta: (dados && dados.resposta) || null,
         utms: location.search.slice(1) || null
       })
-    }).catch(()=>{});
-  }catch(e){}
+    }).catch(() => {});
+  } catch (e) {}
 }
 
-function track(ev, data){
-  try{ if(window.fbq) fbq("trackCustom", ev, data || {}); }catch(e){}
-  try{ window.dataLayer = window.dataLayer || []; dataLayer.push({event:ev, ...(data||{})}); }catch(e){}
+function track(ev, data) {
+  try {
+    if (window.fbq) fbq("trackCustom", ev, data || {});
+  } catch (e) {}
+
+  try {
+    window.dataLayer = window.dataLayer || [];
+    dataLayer.push({ event: ev, ...(data || {}) });
+  } catch (e) {}
 }
 
-/* ==========================================================
-   QUIZ
-   ========================================================== */
 const elP = document.getElementById("pergunta");
 const elO = document.getElementById("opcoes");
 let i = 0;
 
-function destino(){
+function destino() {
   let url = DESTINO;
-  if(PASSA_UTM && location.search.length > 1){
+
+  if (PASSA_UTM && location.search.length > 1) {
     url += (url.includes("?") ? "&" : "?") + location.search.slice(1);
   }
+
   return url;
 }
 
-function render(){
+function render() {
   const p = PERGUNTAS[i];
   elP.textContent = p.q;
   elO.innerHTML = "";
 
-  p.a.forEach(opt=>{
+  p.a.forEach(opt => {
     const b = document.createElement("button");
     b.type = "button";
     b.className = "opt";
     b.textContent = opt.t;
-    b.addEventListener("click", ()=> escolher(opt));
+    b.addEventListener("click", () => escolher(opt));
     elO.appendChild(b);
   });
 }
 
-function escolher(opt){
+function escolher(opt) {
   const p = PERGUNTAS[i];
 
-  registrar("resposta", { etapa: i + 1, pergunta: p.q, resposta: opt.t });
+  registrar("resposta", {
+    etapa: i + 1,
+    pergunta: p.q,
+    resposta: opt.t
+  });
+
   track("QuizStep", { step: i + 1 });
 
-  if(opt.bloqueia){
+  if (opt.bloqueia) {
     registrar("bloqueado_menor", { etapa: i + 1 });
     track("QuizBlockedUnder18", {});
     elP.textContent = "Conteúdo apenas para maiores de 18 anos";
@@ -164,7 +177,7 @@ function escolher(opt){
     return;
   }
 
-  if(opt.avanca){
+  if (opt.avanca) {
     registrar("concluiu", {});
     registrar("clique_cta", {});
     track("QuizComplete", {});
