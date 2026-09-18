@@ -2,234 +2,393 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#ffffff">
-<title>Descubra seu perfil</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Verificação rápida</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  *{box-sizing:border-box}
-  body{
-    margin:0;min-height:100vh;min-height:100dvh;
-    display:flex;align-items:center;justify-content:center;padding:20px;
-    font-family:Inter,Arial,Helvetica,sans-serif;
-    background:#ffffff;
+  :root{
+    --felt:#0C3B2E;
+    --felt-deep:#072A20;
+    --felt-line:#1B5343;
+    --cream:#F3EFE3;
+    --muted:#9DB6A9;
+    --gold:#E0B252;
+    --gold-deep:#B8873A;
+    --radius:18px;
   }
+  :root:not([data-theme="light"]),
+  :root[data-theme="dark"]{ color-scheme:dark; }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--felt-deep);
+    background-image:
+      radial-gradient(120% 80% at 50% 0%, #10493A 0%, var(--felt) 45%, var(--felt-deep) 100%);
+    background-attachment:fixed;
+    color:var(--cream);
+    font-family:"Inter Tight", "Helvetica Neue", Arial, sans-serif;
+    font-size:16px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    min-height:100dvh;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .stage{
+    width:100%;
+    max-width:520px;
+    margin:0 auto;
+    padding:22px 18px 28px;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding-bottom:18px;
+    border-bottom:1px solid var(--felt-line);
+  }
+  .chip{
+    width:26px;height:26px;border-radius:50%;
+    background:var(--gold);
+    border:3px dashed var(--felt-deep);
+    flex:none;
+  }
+  .brand b{font-weight:600;font-size:15px;letter-spacing:.2px;}
+  .brand span{margin-left:auto;font-size:12px;color:var(--muted);}
+
+  .track{
+    margin:22px 0 26px;
+  }
+  .track-label{
+    font-size:12.5px;
+    color:var(--muted);
+    margin-bottom:8px;
+  }
+  .track-bar{
+    height:3px;
+    background:var(--felt-line);
+    border-radius:99px;
+    overflow:hidden;
+  }
+  .track-fill{
+    display:block;height:100%;width:50%;
+    background:var(--gold);
+    border-radius:99px;
+    transition:width .45s cubic-bezier(.4,0,.2,1);
+  }
+
+  .screen{display:none;}
+  .screen.is-active{display:block; animation:enter .4s cubic-bezier(.2,.7,.3,1) both;}
+  @keyframes enter{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+
+  h1{
+    font-family:"Instrument Serif", Georgia, serif;
+    font-weight:400;
+    font-size:38px;
+    line-height:1.12;
+    letter-spacing:-.4px;
+    margin:0 0 12px;
+  }
+  .sub{
+    color:var(--muted);
+    font-size:15px;
+    margin:0 0 28px;
+    max-width:34ch;
+  }
+
+  .answers{display:grid;gap:12px;}
+  .answer{
+    appearance:none;
+    width:100%;
+    text-align:left;
+    font-family:inherit;
+    font-size:18px;
+    font-weight:600;
+    color:var(--cream);
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--felt-line);
+    border-radius:var(--radius);
+    padding:20px 22px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    transition:background .18s ease, border-color .18s ease, transform .1s ease;
+  }
+  .answer .mark{
+    width:22px;height:22px;border-radius:50%;
+    border:1.5px solid var(--felt-line);
+    flex:none;
+  }
+  .answer:hover{background:rgba(255,255,255,.07);border-color:var(--gold-deep);}
+  .answer:active{transform:scale(.99);}
+  .answer:focus-visible{outline:2px solid var(--gold);outline-offset:3px;}
+  .answer.is-picked{background:rgba(224,178,82,.14);border-color:var(--gold);}
+  .answer.is-picked .mark{background:var(--gold);border-color:var(--gold);}
+
+  .checks{list-style:none;margin:0;padding:0;display:grid;gap:14px;}
+  .checks li{
+    display:flex;align-items:center;gap:12px;
+    font-size:16px;color:var(--muted);
+    opacity:.35;
+    transition:opacity .3s ease,color .3s ease;
+  }
+  .checks li.done{opacity:1;color:var(--cream);}
+  .checks li i{
+    font-style:normal;
+    width:22px;height:22px;border-radius:50%;
+    border:1.5px solid var(--felt-line);
+    display:grid;place-items:center;
+    font-size:12px;color:var(--felt-deep);
+    flex:none;
+  }
+  .checks li.done i{background:var(--gold);border-color:var(--gold);}
+
+  .cta{
+    display:block;
+    width:100%;
+    text-align:center;
+    text-decoration:none;
+    font-family:inherit;
+    font-size:19px;
+    font-weight:700;
+    color:#1A1204;
+    background:var(--gold);
+    border:none;
+    border-radius:99px;
+    padding:20px 24px;
+    cursor:pointer;
+    box-shadow:0 10px 26px rgba(224,178,82,.22);
+    transition:background .18s ease, transform .1s ease;
+  }
+  .cta:hover{background:#EFC46B;}
+  .cta:active{transform:scale(.99);}
+  .cta:focus-visible{outline:2px solid var(--cream);outline-offset:3px;}
+
   .card{
-    width:100%;max-width:380px;
-    background:#ffffff;
-    border:1px solid #E6EAF0;
-    border-radius:18px;
-    padding:30px 26px 26px;
-    box-shadow:0 10px 34px rgba(16,24,40,.07);
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--felt-line);
+    border-radius:var(--radius);
+    padding:20px 22px;
+    margin:0 0 24px;
+  }
+  .card p{margin:0;font-size:15px;color:var(--muted);}
+  .card p + p{margin-top:10px;}
+
+  .after{
+    margin-top:16px;
+    font-size:13.5px;
+    color:var(--muted);
     text-align:center;
   }
-  h1{
-    font-size:23px;line-height:1.25;font-weight:800;color:#172033;
-    margin:0 0 22px;
+
+  footer{
+    margin-top:auto;
+    padding-top:32px;
+    font-size:12.5px;
+    color:var(--muted);
+    border-top:1px solid var(--felt-line);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
   }
-  .opt{
-    display:block;width:100%;
-    background:#F5D14E;color:#172033;
-    border:0;border-radius:11px;
-    font-family:inherit;font-size:16px;font-weight:600;
-    padding:16px 14px;margin-bottom:14px;cursor:pointer;
-    transition:background .15s ease,transform .1s ease;
+  footer .age{
+    border:1px solid var(--gold-deep);
+    color:var(--gold);
+    border-radius:99px;
+    padding:2px 9px;
+    font-weight:600;
+    font-size:12px;
+    flex:none;
   }
-  .opt:last-child{margin-bottom:0}
-  .opt:hover{background:#F8DC72}
-  .opt:active{transform:scale(.985)}
-  .opt:focus-visible{outline:3px solid #172033;outline-offset:2px}
-  .msg{font-size:15px;line-height:1.5;color:#667085;margin:0}
-  .debug{
-    position:fixed;left:10px;right:10px;bottom:10px;max-height:40vh;overflow:auto;
-    background:#0B0C10;color:#CBCFD6;border-radius:10px;padding:12px;
-    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;line-height:1.5;
-    white-space:pre-wrap;word-break:break-word;text-align:left
+
+  @media (min-width:520px){
+    h1{font-size:44px;}
+    .stage{padding:32px 24px 32px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important;}
   }
 </style>
 </head>
 <body>
+<div class="stage">
 
-<main class="card">
-  <h1 id="pergunta"></h1>
-  <div id="opcoes"></div>
-</main>
-<pre class="debug" id="debug" hidden></pre>
+  <div class="brand">
+    <div class="chip" aria-hidden="true"></div>
+    <b>Verificação de acesso</b>
+    <span>2 perguntas</span>
+  </div>
+
+  <div class="track" id="track">
+    <div class="track-label" id="trackLabel">Pergunta 1 de 2</div>
+    <div class="track-bar"><span class="track-fill" id="trackFill"></span></div>
+  </div>
+
+  <main id="app">
+
+    <section class="screen is-active" id="q1">
+      <h1>Você tem mais de 18 anos?</h1>
+      <p class="sub">Precisamos confirmar sua idade antes de liberar o conteúdo.</p>
+      <div class="answers">
+        <button class="answer" type="button" data-q="1" data-v="sim">Sim, sou maior de 18<span class="mark"></span></button>
+        <button class="answer" type="button" data-q="1" data-v="nao">Não<span class="mark"></span></button>
+      </div>
+    </section>
+
+    <section class="screen" id="q2">
+      <h1>Você gosta de diversão online?</h1>
+      <p class="sub">Assim conseguimos mostrar o conteúdo certo para o seu perfil.</p>
+      <div class="answers">
+        <button class="answer" type="button" data-q="2" data-v="sim">Sim, gosto<span class="mark"></span></button>
+        <button class="answer" type="button" data-q="2" data-v="nao">Não muito<span class="mark"></span></button>
+      </div>
+    </section>
+
+    <section class="screen" id="checking">
+      <h1>Analisando suas respostas</h1>
+      <p class="sub">Leva só alguns segundos.</p>
+      <ul class="checks" id="checks">
+        <li><i>✓</i>Idade confirmada</li>
+        <li><i>✓</i>Perfil avaliado</li>
+        <li><i>✓</i>Acesso liberado</li>
+      </ul>
+    </section>
+
+    <section class="screen" id="result">
+      <h1>Tudo certo. Seu acesso está liberado.</h1>
+      <p class="sub">Toque no botão abaixo para continuar. O acesso vale para este dispositivo.</p>
+      <a class="cta" id="ctaLink" href="#" rel="nofollow noopener">Acessar agora</a>
+      <div class="after">Disponível apenas para maiores de 18 anos.</div>
+    </section>
+
+    <section class="screen" id="blocked">
+      <h1>Acesso não liberado</h1>
+      <div class="card">
+        <p>Este conteúdo é destinado exclusivamente a pessoas com 18 anos ou mais.</p>
+        <p>Você pode fechar esta página com segurança.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <span class="age">+18</span>
+  </footer>
+
+</div>
 
 <script>
-/* ===================== CONFIGURAÇÃO ===================== */
-const DESTINO = "https://sitevb.site/sebben";          // destino padrão
-const DESTINO_ROLETA = "https://rol-cadastro.onrender.com/";
-const PASSA_UTM = true;
+/* =========================================================
+   CONFIGURAÇÃO — altere só este bloco
+   ========================================================= */
+const CONFIG = {
+  // Link de saída (oferta, Keitaro, etc.)
+  linkOferta: "https://sitevb.site/curiosidadeaviao",
 
-const SUPABASE = {
-  ativo: true,
-  url: "https://wkweqhszjujvevnbhhzg.supabase.co",
-  anon: "sb_publishable_0QsDv6tagm5DUVbuf8IXBQ_HSGhI_Mg",
-  tabela: "quiz_eventos"
+  // Repassa as query strings da URL atual para o link de saída
+  // (utm_source, utm_campaign, sub_id, click_id...)
+  repassarParametros: true,
+
+  // Avança sozinho para a tela final após a verificação
+  redirecionarAutomatico: false,
+
+  // Tempo de cada etapa da verificação, em ms
+  tempoEtapa: 550
 };
+/* ========================================================= */
 
-const PERGUNTAS = [
-  {
-    q: "Você tem mais de 18 anos?",
-    a: [{ t: "Sim" }, { t: "Não", bloqueia: true }]
-  },
-  {
-    // 2ª pergunta: qualquer resposta manda para a roleta
-    q: "Você gosta de se divertir online e receber vários benefícios?",
-    a: [
-      { t: "Sim", avanca: true, destino: DESTINO_ROLETA },
-      { t: "Mais ou menos", avanca: true, destino: DESTINO_ROLETA }
-    ]
-  },
-  {
-    q: "Se você tivesse um ganho alto hoje, o que faria?",
-    a: [
-      { t: "Colocaria as contas em dia" },
-      { t: "Guardaria uma parte" },
-      { t: "Realizaria um sonho antigo" },
-      { t: "Aproveitaria o momento" }
-    ]
-  },
-  {
-    q: "Você gosta de novidades e promoções quentes?",
-    a: [
-      { t: "Sim", avanca: true },
-      { t: "Quero entender melhor", avanca: true }
-    ]
+const telas = {
+  q1: document.getElementById("q1"),
+  q2: document.getElementById("q2"),
+  checking: document.getElementById("checking"),
+  result: document.getElementById("result"),
+  blocked: document.getElementById("blocked")
+};
+const track = document.getElementById("track");
+const trackLabel = document.getElementById("trackLabel");
+const trackFill = document.getElementById("trackFill");
+const respostas = {};
+
+function mostrar(nome) {
+  Object.values(telas).forEach(function (t) { t.classList.remove("is-active"); });
+  telas[nome].classList.add("is-active");
+  window.scrollTo(0, 0);
+}
+
+function montarLink() {
+  var base = CONFIG.linkOferta;
+  if (!CONFIG.repassarParametros) return base;
+  try {
+    var atual = new URLSearchParams(window.location.search);
+    if (![].concat.apply([], [Array.from(atual.keys())]).length) return base;
+    var destino = new URL(base, window.location.href);
+    atual.forEach(function (valor, chave) { destino.searchParams.set(chave, valor); });
+    return destino.toString();
+  } catch (e) {
+    return base;
   }
-];
-/* =================== FIM DA CONFIGURAÇÃO ================= */
-
-const SESSAO = (crypto && crypto.randomUUID)
-  ? crypto.randomUUID()
-  : String(Date.now()) + "-" + Math.random().toString(36).slice(2);
-
-const DEBUG = new URLSearchParams(location.search).has("debug");
-
-function log(txt){
-  console.log("[quiz]", txt);
-  if(!DEBUG) return;
-  const d = document.getElementById("debug");
-  d.hidden = false;
-  d.textContent += txt + "\n";
-  d.scrollTop = d.scrollHeight;
 }
 
-function registrar(evento, dados) {
-  if (!SUPABASE.ativo) return;
-
-  const linha = {
-    sessao: SESSAO,
-    evento: evento,
-    etapa: (dados && dados.etapa) || null,
-    pergunta: (dados && dados.pergunta) || null,
-    resposta: (dados && dados.resposta) || null,
-    utms: location.search.slice(1) || null
-  };
-
-  fetch(SUPABASE.url + "/rest/v1/" + SUPABASE.tabela, {
-    method: "POST",
-    keepalive: true,
-    headers: {
-      "apikey": SUPABASE.anon,
-      "Authorization": "Bearer " + SUPABASE.anon,
-      "Content-Type": "application/json",
-      "Prefer": "return=minimal"
-    },
-    body: JSON.stringify(linha)
-  })
-  .then(r => r.text().then(t => {
-    if (r.ok) log("OK " + r.status + " · " + evento);
-    else log("ERRO " + r.status + " · " + evento + " · " + t);
-  }))
-  .catch(e => log("FALHA DE REDE · " + evento + " · " + e.message));
-}
-
-function track(ev, data) {
-  try {
-    if (window.fbq) fbq("trackCustom", ev, data || {});
-  } catch (e) {}
-
-  try {
-    window.dataLayer = window.dataLayer || [];
-    dataLayer.push({ event: ev, ...(data || {}) });
-  } catch (e) {}
-}
-
-const elP = document.getElementById("pergunta");
-const elO = document.getElementById("opcoes");
-let i = 0;
-
-function destino(base) {
-  const url = base || DESTINO;
-  const q = PASSA_UTM
-    ? new URLSearchParams(location.search)
-    : new URLSearchParams();
-
-  q.delete("debug");
-  q.set("sub_id", SESSAO);            // amarra o quiz ao lead da roleta
-  if (DEBUG) q.set("debug", "1");
-
-  return url + (url.includes("?") ? "&" : "?") + q.toString();
-}
-
-function render() {
-  const p = PERGUNTAS[i];
-  elP.textContent = p.q;
-  elO.innerHTML = "";
-
-  p.a.forEach(opt => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "opt";
-    b.textContent = opt.t;
-    b.addEventListener("click", () => escolher(opt));
-    elO.appendChild(b);
+function rodarVerificacao() {
+  track.style.visibility = "hidden";
+  mostrar("checking");
+  var itens = document.querySelectorAll("#checks li");
+  itens.forEach(function (item, i) {
+    setTimeout(function () {
+      item.classList.add("done");
+      if (i === itens.length - 1) {
+        setTimeout(function () {
+          var link = montarLink();
+          document.getElementById("ctaLink").setAttribute("href", link);
+          if (CONFIG.redirecionarAutomatico) {
+            window.location.href = link;
+          } else {
+            mostrar("result");
+          }
+        }, 500);
+      }
+    }, CONFIG.tempoEtapa * (i + 1));
   });
 }
 
-function escolher(opt) {
-  const p = PERGUNTAS[i];
+document.querySelectorAll(".answer").forEach(function (botao) {
+  botao.addEventListener("click", function () {
+    var pergunta = botao.dataset.q;
+    var valor = botao.dataset.v;
+    respostas["q" + pergunta] = valor;
 
-  registrar("resposta", {
-    etapa: i + 1,
-    pergunta: p.q,
-    resposta: opt.t
+    botao.parentElement.querySelectorAll(".answer").forEach(function (b) {
+      b.classList.remove("is-picked");
+    });
+    botao.classList.add("is-picked");
+
+    setTimeout(function () {
+      if (pergunta === "1") {
+        if (valor === "nao") {
+          track.style.visibility = "hidden";
+          mostrar("blocked");
+          return;
+        }
+        trackLabel.textContent = "Pergunta 2 de 2";
+        trackFill.style.width = "100%";
+        mostrar("q2");
+      } else {
+        rodarVerificacao();
+      }
+    }, 260);
   });
-
-  track("QuizStep", { step: i + 1 });
-
-  if (opt.bloqueia) {
-    registrar("bloqueado_menor", { etapa: i + 1 });
-    track("QuizBlockedUnder18", {});
-    elP.textContent = "Conteúdo apenas para maiores de 18 anos";
-    elO.innerHTML = '<p class="msg">Não é possível continuar.</p>';
-    return;
-  }
-
-  if (opt.avanca) {
-    const url = destino(opt.destino);
-
-    registrar("concluiu", { etapa: i + 1 });
-    registrar("clique_cta", { etapa: i + 1, resposta: opt.t });
-    track("QuizComplete", {});
-    track("QuizCTAClick", {});
-
-    log("indo para " + url);
-    elP.textContent = "Preparando sua roleta...";
-    elO.innerHTML = '<p class="msg">Um instante.</p>';
-
-    // meio segundo para os registros saírem antes de trocar de página
-    setTimeout(() => { window.location.href = url; }, DEBUG ? 4000 : 500);
-    return;
-  }
-
-  i++;
-  render();
-}
-
-registrar("iniciou", {});
-render();
+});
 </script>
 </body>
 </html>
