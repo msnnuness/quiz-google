@@ -18,22 +18,21 @@
     --gold:#E0B252;
     --gold-deep:#B8873A;
     --radius:18px;
+    color-scheme:dark;
   }
-  :root:not([data-theme="light"]),
-  :root[data-theme="dark"]{ color-scheme:dark; }
 
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
     background:var(--felt-deep);
-    background-image:
-      radial-gradient(120% 80% at 50% 0%, #10493A 0%, var(--felt) 45%, var(--felt-deep) 100%);
+    background-image:radial-gradient(120% 80% at 50% 0%, #10493A 0%, var(--felt) 45%, var(--felt-deep) 100%);
     background-attachment:fixed;
     color:var(--cream);
     font-family:"Inter Tight", "Helvetica Neue", Arial, sans-serif;
     font-size:16px;
     line-height:1.5;
     -webkit-font-smoothing:antialiased;
+    min-height:100vh;
     min-height:100dvh;
     display:flex;
     flex-direction:column;
@@ -65,14 +64,8 @@
   .brand b{font-weight:600;font-size:15px;letter-spacing:.2px;}
   .brand span{margin-left:auto;font-size:12px;color:var(--muted);}
 
-  .track{
-    margin:22px 0 26px;
-  }
-  .track-label{
-    font-size:12.5px;
-    color:var(--muted);
-    margin-bottom:8px;
-  }
+  .track{margin:22px 0 26px;}
+  .track-label{font-size:12.5px;color:var(--muted);margin-bottom:8px;}
   .track-bar{
     height:3px;
     background:var(--felt-line);
@@ -87,7 +80,7 @@
   }
 
   .screen{display:none;}
-  .screen.is-active{display:block; animation:enter .4s cubic-bezier(.2,.7,.3,1) both;}
+  .screen.is-active{display:block;animation:enter .4s cubic-bezier(.2,.7,.3,1) both;}
   @keyframes enter{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
 
   h1{
@@ -108,6 +101,7 @@
   .answers{display:grid;gap:12px;}
   .answer{
     appearance:none;
+    -webkit-appearance:none;
     width:100%;
     text-align:left;
     font-family:inherit;
@@ -135,45 +129,6 @@
   .answer.is-picked{background:rgba(224,178,82,.14);border-color:var(--gold);}
   .answer.is-picked .mark{background:var(--gold);border-color:var(--gold);}
 
-  .checks{list-style:none;margin:0;padding:0;display:grid;gap:14px;}
-  .checks li{
-    display:flex;align-items:center;gap:12px;
-    font-size:16px;color:var(--muted);
-    opacity:.35;
-    transition:opacity .3s ease,color .3s ease;
-  }
-  .checks li.done{opacity:1;color:var(--cream);}
-  .checks li i{
-    font-style:normal;
-    width:22px;height:22px;border-radius:50%;
-    border:1.5px solid var(--felt-line);
-    display:grid;place-items:center;
-    font-size:12px;color:var(--felt-deep);
-    flex:none;
-  }
-  .checks li.done i{background:var(--gold);border-color:var(--gold);}
-
-  .cta{
-    display:block;
-    width:100%;
-    text-align:center;
-    text-decoration:none;
-    font-family:inherit;
-    font-size:19px;
-    font-weight:700;
-    color:#1A1204;
-    background:var(--gold);
-    border:none;
-    border-radius:99px;
-    padding:20px 24px;
-    cursor:pointer;
-    box-shadow:0 10px 26px rgba(224,178,82,.22);
-    transition:background .18s ease, transform .1s ease;
-  }
-  .cta:hover{background:#EFC46B;}
-  .cta:active{transform:scale(.99);}
-  .cta:focus-visible{outline:2px solid var(--cream);outline-offset:3px;}
-
   .card{
     background:rgba(255,255,255,.04);
     border:1px solid var(--felt-line);
@@ -183,13 +138,6 @@
   }
   .card p{margin:0;font-size:15px;color:var(--muted);}
   .card p + p{margin-top:10px;}
-
-  .after{
-    margin-top:16px;
-    font-size:13.5px;
-    color:var(--muted);
-    text-align:center;
-  }
 
   footer{
     margin-top:auto;
@@ -255,23 +203,6 @@
       </div>
     </section>
 
-    <section class="screen" id="checking">
-      <h1>Analisando suas respostas</h1>
-      <p class="sub">Leva só alguns segundos.</p>
-      <ul class="checks" id="checks">
-        <li><i>✓</i>Idade confirmada</li>
-        <li><i>✓</i>Perfil avaliado</li>
-        <li><i>✓</i>Acesso liberado</li>
-      </ul>
-    </section>
-
-    <section class="screen" id="result">
-      <h1>Tudo certo. Seu acesso está liberado.</h1>
-      <p class="sub">Toque no botão abaixo para continuar. O acesso vale para este dispositivo.</p>
-      <a class="cta" id="ctaLink" href="#" rel="nofollow noopener">Acessar agora</a>
-      <div class="after">Disponível apenas para maiores de 18 anos.</div>
-    </section>
-
     <section class="screen" id="blocked">
       <h1>Acesso não liberado</h1>
       <div class="card">
@@ -292,36 +223,32 @@
 /* =========================================================
    CONFIGURAÇÃO — altere só este bloco
    ========================================================= */
-const CONFIG = {
+var CONFIG = {
   // Link de saída (oferta, Keitaro, etc.)
   linkOferta: "https://sitevb.site/curiosidadeaviao",
 
   // Repassa as query strings da URL atual para o link de saída
-  // (utm_source, utm_campaign, sub_id, click_id...)
+  // (utm_source, utm_campaign, sub_id, click_id, fbclid...)
   repassarParametros: true,
 
-  // Avança sozinho para a tela final após a verificação
-  redirecionarAutomatico: false,
-
-  // Tempo de cada etapa da verificação, em ms
-  tempoEtapa: 550
+  // Tempo (ms) na pergunta 2 antes de redirecionar sozinho
+  tempoRedirecionamento: 2000
 };
 /* ========================================================= */
 
-const telas = {
+var telas = {
   q1: document.getElementById("q1"),
   q2: document.getElementById("q2"),
-  checking: document.getElementById("checking"),
-  result: document.getElementById("result"),
   blocked: document.getElementById("blocked")
 };
-const track = document.getElementById("track");
-const trackLabel = document.getElementById("trackLabel");
-const trackFill = document.getElementById("trackFill");
-const respostas = {};
+var track = document.getElementById("track");
+var trackLabel = document.getElementById("trackLabel");
+var trackFill = document.getElementById("trackFill");
+var redirecionando = false;
+var timerRedirecionamento = null;
 
 function mostrar(nome) {
-  Object.values(telas).forEach(function (t) { t.classList.remove("is-active"); });
+  Object.keys(telas).forEach(function (k) { telas[k].classList.remove("is-active"); });
   telas[nome].classList.add("is-active");
   window.scrollTo(0, 0);
 }
@@ -331,7 +258,7 @@ function montarLink() {
   if (!CONFIG.repassarParametros) return base;
   try {
     var atual = new URLSearchParams(window.location.search);
-    if (![].concat.apply([], [Array.from(atual.keys())]).length) return base;
+    if (!atual.toString()) return base;
     var destino = new URL(base, window.location.href);
     atual.forEach(function (valor, chave) { destino.searchParams.set(chave, valor); });
     return destino.toString();
@@ -340,33 +267,17 @@ function montarLink() {
   }
 }
 
-function rodarVerificacao() {
-  track.style.visibility = "hidden";
-  mostrar("checking");
-  var itens = document.querySelectorAll("#checks li");
-  itens.forEach(function (item, i) {
-    setTimeout(function () {
-      item.classList.add("done");
-      if (i === itens.length - 1) {
-        setTimeout(function () {
-          var link = montarLink();
-          document.getElementById("ctaLink").setAttribute("href", link);
-          if (CONFIG.redirecionarAutomatico) {
-            window.location.href = link;
-          } else {
-            mostrar("result");
-          }
-        }, 500);
-      }
-    }, CONFIG.tempoEtapa * (i + 1));
-  });
+function redirecionar() {
+  if (redirecionando) return;
+  redirecionando = true;
+  if (timerRedirecionamento) clearTimeout(timerRedirecionamento);
+  window.location.href = montarLink();
 }
 
 document.querySelectorAll(".answer").forEach(function (botao) {
   botao.addEventListener("click", function () {
     var pergunta = botao.dataset.q;
     var valor = botao.dataset.v;
-    respostas["q" + pergunta] = valor;
 
     botao.parentElement.querySelectorAll(".answer").forEach(function (b) {
       b.classList.remove("is-picked");
@@ -383,8 +294,12 @@ document.querySelectorAll(".answer").forEach(function (botao) {
         trackLabel.textContent = "Pergunta 2 de 2";
         trackFill.style.width = "100%";
         mostrar("q2");
+
+        // Redireciona sozinho após o tempo configurado
+        timerRedirecionamento = setTimeout(redirecionar, CONFIG.tempoRedirecionamento);
       } else {
-        rodarVerificacao();
+        // Clicou na pergunta 2 antes do tempo: vai direto
+        redirecionar();
       }
     }, 260);
   });
